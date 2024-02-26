@@ -16,11 +16,11 @@ String getMoistureValue() {
   String message;
 
   if (moistureValue < 500) {
-    message = "tanaman lu kering anjing";
+    message = "soil is dry af man";
   } else if (moistureValue > 500 && moistureValue < 700) {
-    message = "udah bagus sih";
+    message = "c'est parfait";
   } else {
-    message = "terlalu basah coy";
+    message = "soil is too wet";
   }
 
   return String(moistureValue) + ": " + message;
@@ -37,8 +37,8 @@ void handleNewMessages(int newNumMessages) {
 
     String incomingText = String(bot.messages[i].text);
 
-    if (incomingText == "/start") {
-      String welcome = "Halo"  + bot.messages[i].from_name + " anjing...";
+    if (incomingText == "/greet") {
+      String welcome = "Hello "  + bot.messages[i].from_name + " you dumb mf...";
       bot.sendMessage(CHAT_ID, welcome, "");
     } else if (incomingText == "/status") {
       String moistureValue = getMoistureValue();
@@ -59,6 +59,7 @@ void setup() {
   WiFi.begin(SSID, PASSWORD);
 
   while(WiFi.status() != WL_CONNECTED) {
+    delay(500);
     Serial.println("connecting to WiFi..");
   }
 
