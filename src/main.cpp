@@ -11,19 +11,9 @@ UniversalTelegramBot bot(BOT_TOKEN, client);
 
 #define MOISTURE_SENSOR_PIN A0
 
-String getMoistureValue() {
+int getMoistureValue() {
   int moistureValue = analogRead(MOISTURE_SENSOR_PIN);
-  String message;
-
-  if (moistureValue < 500) {
-    message = "soil is dry af man";
-  } else if (moistureValue > 500 && moistureValue < 700) {
-    message = "c'est parfait";
-  } else {
-    message = "soil is too wet";
-  }
-
-  return String(moistureValue) + ": " + message;
+  return moistureValue;
 }
 
 void handleNewMessages(int newNumMessages) {
@@ -37,14 +27,29 @@ void handleNewMessages(int newNumMessages) {
 
     String incomingText = String(bot.messages[i].text);
 
-    if (incomingText == "/greet") {
+    String instructions = "Type in /moisture_greet to display available commands, and /moisture_status to get the latest moisture status.";
+    if (incomingText == "/moisture_greet") {
       String welcome = "Hello "  + bot.messages[i].from_name + " you dumb mf...";
+
       bot.sendMessage(CHAT_ID, welcome, "");
-    } else if (incomingText == "/status") {
-      String moistureValue = getMoistureValue();
-      bot.sendMessage(CHAT_ID, moistureValue, "");
-    }  else {
-      bot.sendMessage(CHAT_ID, incomingText, "");
+      bot.sendMessage(CHAT_ID, instructions, "");
+    } else if (incomingText == "/moisture_status") {
+      int moistureValue = getMoistureValue();
+
+      String message;
+
+      if (moistureValue < 500) {
+        message = "soil is dry af man";
+      } else if (moistureValue > 500 && moistureValue < 700) {
+        message = "c'est parfait";
+      } else {
+        message = "soil is too wet";
+      }
+
+      bot.sendMessage(CHAT_ID, String(moistureValue) + ": " + message, "");
+    } else {
+      bot.sendMessage(CHAT_ID, "I don't understand you...");
+      bot.sendMessage(CHAT_ID, instructions);
     }
   }
 }
@@ -76,6 +81,13 @@ void loop() {
     Serial.println("got response");
     handleNewMessages(numNewMessages);
     numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+  }
+
+  // send message automatically if soil is too dry
+  int moistureValue = getMoistureValue();
+  if (moistureValue < 500) {
+    String message = String(moistureValue) + ": water your plant!";
+    bot.sendMessage(CHAT_ID, message);
   }
 
   Serial.println("scanning for messages...");
